@@ -4,6 +4,9 @@
 	"description": "自动引入匹配的 Class 所在文件",
 	"version": "0.0.1",
 	"publisher": "ronglecat",
+	"repository": {
+		"url": "https://github.com/RongleCat/dart-class-import.git"
+	},
 	"engines": {
 		"vscode": "^1.57.0"
 	},
@@ -13,7 +16,7 @@
 	"activationEvents": [
 		"onLanguage:dart"
 	],
-	"icon": "./icon.png",
+	"icon": "icon.png",
 	"main": "./dist/extension.js",
 	"contributes": {
 		"commands": [
