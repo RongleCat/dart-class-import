@@ -1,22 +1,35 @@
-import * as vscode from 'vscode';
+import {
+  workspace,
+  Uri,
+  ProgressLocation,
+  ExtensionContext,
+  window,
+  CancellationToken,
+  Progress,
+} from 'vscode';
 const fs = require('fs');
-
-const { window } = vscode;
 
 export interface ClassResultItem {
   key: string;
   path: string;
 }
 
-export const findClassWithFile = async (allFiles: Array<vscode.Uri>) => {
+export const findClassWithFile = async (context: ExtensionContext) => {
+  const allFiles: Array<Uri> = await workspace.findFiles('**/*.dart');
   const allFilesCount = allFiles.length;
-  return window.withProgress(
+  const allMatchClassList: Array<ClassResultItem> = await window.withProgress(
     {
-      location: vscode.ProgressLocation.Window,
+      location: ProgressLocation.Window,
       title: '正在匹配所有 Class',
       cancellable: true,
     },
-    (progress, token) => {
+    (
+      progress: Progress<{
+        message?: string | undefined;
+        increment?: number | undefined;
+      }>,
+      token: CancellationToken
+    ) => {
       token.onCancellationRequested(() => {
         console.log('User canceled the long running operation');
       });
@@ -25,11 +38,12 @@ export const findClassWithFile = async (allFiles: Array<vscode.Uri>) => {
 
       let allClassList: Array<ClassResultItem> = [];
 
-      const p = new Promise<Array<ClassResultItem>>(async (resolve) => {
+      return new Promise<Array<ClassResultItem>>(async (resolve) => {
         for (let i = 0; i < allFiles.length; i++) {
-          const fileItem: vscode.Uri = allFiles[i];
+          const fileItem: Uri = allFiles[i];
+          const fileContent = fs.readFileSync(fileItem.fsPath).toString();
           const singleFileIncludedClass = await findClassWithSingleFile(
-            fileItem.fsPath
+            fileContent
           );
           progress.report({
             increment: Math.floor(i / allFilesCount),
@@ -42,17 +56,18 @@ export const findClassWithFile = async (allFiles: Array<vscode.Uri>) => {
 
         resolve(allClassList);
       });
-
-      return p;
     }
   );
+
+  context.workspaceState.update('allMatchClassList', allMatchClassList);
 };
 
-async function findClassWithSingleFile(filePath: string) {
-  const fileContent = fs.readFileSync(filePath).toString();
+export const findClassWithSingleFile = async (
+  fileContent: string
+): Promise<RegExpMatchArray> => {
   const classList = fileContent.match(/(?<=class\s|enum\s)([a-zA-Z0-9$]+)/gm);
   if (classList) {
     return classList;
   }
   return [];
-}
+};

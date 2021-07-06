@@ -1,9 +1,11 @@
-# Change Log
+# 更新日志
 
-All notable changes to the "dart-class-import" extension will be documented in this file.
+## [0.0.1]
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+- 最初的发布版本
 
-## [Unreleased]
+<!-- ## [0.0.1] - 2021-07-06
 
-- Initial release
+### 新增
+
+-  -->

@@ -11,9 +11,9 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:dart-class-import.helloWorld",
-		"workspaceContains:**/*.dart"
+		"onLanguage:dart"
 	],
+	"icon": "./icon.png",
 	"main": "./dist/extension.js",
 	"contributes": {
 		"commands": [
