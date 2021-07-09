@@ -2,7 +2,7 @@
 	"name": "dart-class-import",
 	"displayName": "Dart Class Import",
 	"description": "自动引入匹配的 Class 所在文件",
-	"version": "0.1.0",
+	"version": "0.0.2",
 	"publisher": "ronglecat",
 	"repository": {
 		"url": "https://github.com/RongleCat/dart-class-import.git"
