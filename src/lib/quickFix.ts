@@ -32,28 +32,57 @@ class ImportProvider implements CodeActionProvider {
   ): Promise<CodeAction[]> {
     allMatchClassList =
       mainContext.workspaceState.get('allMatchClassList') ?? [];
-    const codeActions: CodeAction[] = [];
-    context.diagnostics
-      .filter((d) => d.severity === DiagnosticSeverity.Error)
-      .flat()
-      .forEach((diagnostic: Diagnostic) => {
-        const match: RegExpExecArray | null = /Undefined name '(\S+)'\./.exec(
-          diagnostic.message
-        );
-        if (match) {
-          const name = match[1];
-          codeActions.push(
-            ...this.addImportForVariable(
-              document,
-              diagnostic,
-              name,
-              this.search(name)
-            )
-          );
-        }
-      });
 
-    return codeActions;
+    const patterns = [
+      /Undefined name '(\S+)'\./,
+      /The name '(\S+)' isn't/,
+      /Undefined class '(\S+)'\./,
+    ];
+
+    const codeActions = await Promise.all(
+      context.diagnostics
+        .filter((d) => d.severity === DiagnosticSeverity.Error)
+        .flatMap((diagnostic) =>
+          patterns
+            .map((pattern) => pattern.exec(diagnostic.message))
+            .filter((match) => match)
+            .flatMap((match) => {
+              const name: string = match![1];
+              return this.addImportForVariable(
+                document,
+                diagnostic,
+                name,
+                this.search(name)
+              );
+            })
+        )
+    );
+
+    return codeActions.flat();
+
+    // const codeActions: CodeAction[] = [];
+
+    // context.diagnostics
+    //   .filter((d) => d.severity === DiagnosticSeverity.Error)
+    //   .flat()
+    //   .forEach((diagnostic: Diagnostic) => {
+    //     const match: RegExpExecArray | null = /Undefined name '(\S+)'\./.exec(
+    //       diagnostic.message
+    //     );
+    //     if (match) {
+    //       const name = match[1];
+    //       codeActions.push(
+    //         ...this.addImportForVariable(
+    //           document,
+    //           diagnostic,
+    //           name,
+    //           this.search(name)
+    //         )
+    //       );
+    //     }
+    //   });
+
+    // return codeActions;
   }
 
   private search(name: string) {
