@@ -12,6 +12,7 @@ import {
   languages,
   window,
   commands,
+  Disposable,
 } from 'vscode';
 const path = require('path');
 import insertImport from './insert';
@@ -93,11 +94,46 @@ class ImportProvider implements CodeActionProvider {
   }
 }
 
-export default async (context: ExtensionContext) => {
-  mainContext = context;
-  const provider: ImportProvider = new ImportProvider();
-  const command = commands.registerCommand(provider.commandId, insertImport);
-  context.subscriptions.push(command);
+export default class QuickFix {
+  public moduleName: string = 'quickFixIsOpen';
+  static disposeExample: Disposable;
+  static commandDisposeExample: Disposable;
 
-  return languages.registerCodeActionsProvider('dart', provider);
-};
+  constructor(context: ExtensionContext) {
+    mainContext = context;
+  }
+
+  /**
+   * 监听快速修复
+   *
+   * @memberof QuickFix
+   */
+  public active() {
+    const provider: ImportProvider = new ImportProvider();
+    QuickFix.disposeExample = languages.registerCodeActionsProvider(
+      'dart',
+      provider
+    );
+
+    QuickFix.commandDisposeExample = commands.registerCommand(
+      provider.commandId,
+      insertImport
+    );
+
+    mainContext.subscriptions.push(QuickFix.disposeExample);
+    mainContext.subscriptions.push(QuickFix.commandDisposeExample);
+  }
+
+  /**
+   * 注销监听
+   *
+   * @memberof QuickFix
+   */
+  public dispose() {
+    QuickFix.disposeExample && QuickFix.disposeExample.dispose();
+    QuickFix.disposeExample = null!;
+
+    QuickFix.commandDisposeExample && QuickFix.commandDisposeExample.dispose();
+    QuickFix.commandDisposeExample = null!;
+  }
+}

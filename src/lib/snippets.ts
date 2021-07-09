@@ -9,6 +9,7 @@ import {
   CompletionItemProvider,
   window,
   languages,
+  Disposable,
 } from 'vscode';
 const path = require('path');
 import { ClassResultItem } from './find';
@@ -52,6 +53,16 @@ const triggerCharacters = [
 ];
 
 class ImportClassSnippetsProvider implements CompletionItemProvider {
+  /**
+   * 提供匹配项目
+   *
+   * @param {TextDocument} document
+   * @param {Position} position
+   * @param {CancellationToken} token
+   * @param {CompletionContext} context
+   * @return {*}  {CompletionItem[]}
+   * @memberof ImportClassSnippetsProvider
+   */
   public provideCompletionItems(
     document: TextDocument,
     position: Position,
@@ -91,18 +102,48 @@ class ImportClassSnippetsProvider implements CompletionItemProvider {
     return [];
   }
 
+  /**
+   * 返回选择项预处理
+   *
+   * @param {CompletionItem} item
+   * @return {*}
+   * @memberof ImportClassSnippetsProvider
+   */
   public resolveCompletionItem(item: CompletionItem) {
     mainContext.workspaceState.update('currentChoiceItem', item);
     return item;
   }
 }
 
-export default async (context: ExtensionContext) => {
-  mainContext = context;
+export default class Snippets {
+  public moduleName: string = 'snippetsIsOpen';
+  static disposeExample: Disposable;
 
-  return languages.registerCompletionItemProvider(
-    'dart',
-    new ImportClassSnippetsProvider(),
-    ...triggerCharacters
-  );
-};
+  constructor(context: ExtensionContext) {
+    mainContext = context;
+  }
+
+  /**
+   * 监听输入展开代码提示
+   *
+   * @memberof Snippets
+   */
+  public active() {
+    Snippets.disposeExample = languages.registerCompletionItemProvider(
+      'dart',
+      new ImportClassSnippetsProvider(),
+      ...triggerCharacters
+    );
+    mainContext.subscriptions.push(Snippets.disposeExample);
+  }
+
+  /**
+   * 注销监听
+   *
+   * @memberof Snippets
+   */
+  public dispose() {
+    Snippets.disposeExample && Snippets.disposeExample.dispose();
+    Snippets.disposeExample = null!;
+  }
+}
