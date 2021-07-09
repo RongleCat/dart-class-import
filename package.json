@@ -2,7 +2,7 @@
 	"name": "dart-class-import",
 	"displayName": "Dart Class Import",
 	"description": "自动引入匹配的 Class 所在文件",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"publisher": "ronglecat",
 	"repository": {
 		"url": "https://github.com/RongleCat/dart-class-import.git"
@@ -19,12 +19,22 @@
 	"icon": "icon.png",
 	"main": "./dist/extension.js",
 	"contributes": {
-		"commands": [
-			{
-				"command": "dart-class-import.helloWorld",
-				"title": "Hello World"
+		"configuration": {
+			"type": "object",
+			"title": "Dart Class Import",
+			"properties": {
+				"dartClassImport.openSnippets": {
+					"type": "boolean",
+					"default": false,
+					"description": "是否开启代码提示（开启后与 Dart & Flutter 插件冲突，建议不开）"
+				},
+				"dartClassImport.openQuickFix": {
+					"type": "boolean",
+					"default": true,
+					"description": "是否开启快速修复"
+				}
 			}
-		]
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run package",
